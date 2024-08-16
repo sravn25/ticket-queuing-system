@@ -27,7 +27,8 @@ const QueueProgress = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const progressPercentage = (progress / MAX_TICKETS) * 100;
+  //const progressPercentage = (progress / MAX_TICKETS) * 100;
+  const progressPercentage = 80;
 
   return (
     <div className="flex flex-col justify-center items-center space-y-2">

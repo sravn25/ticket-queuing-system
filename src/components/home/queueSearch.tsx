@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { getStudentId, QueueData } from "@/lib/queueFirestore";
 import toast, { Toaster } from "react-hot-toast";
-import { Check, X } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 
 const studentIdRegex = /^\d{7}$/;
 
@@ -34,30 +34,35 @@ const QueueSearch = () => {
 
   return (
     <>
-      <div className="text-black flex flex-col gap-4 justify-center min-h-80">
+      <div className="text-black flex flex-col gap-4 justify-center font-alata">
         <form
           onSubmit={onSubmit}
-          className="flex flex-col items-center justify-center border rounded sm:mx-auto p-6 bg-slate-600 space-y-6"
+          className="flex flex-col items-center justify-center border rounded sm:mx-auto p-6 bg-celestialLightGray space-y-6"
         >
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 font-alata">
             <Input
               type="text"
-              placeholder="Student ID"
+              placeholder="Type your student ID here..."
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-52"
+              className="w-52 bg-celestialDarkGray !placeholder-celestialLightGray text-white"
             />
-            <Button type="submit" variant="secondary">
+            <Button
+              type="submit"
+              variant="default"
+              className="flex items-center gap-2 bg-celestialDarkGray text-white"
+            >
               Search
+              <Search className="w-4" />
             </Button>
           </div>
-          <div className="border p-4 rounded-lg text-white w-full h-full">
+          <div className="border p-4 rounded-lg text-white w-full h-full bg-celestialDarkGray">
             {result ? (
               <div className="space-y-2">
-                <h3 className="font-semibold underline underline-offset-2">
+                <h3 className="font-semibold underline underline-offset-2 text-center">
                   Queue Search Result
                 </h3>
-                <div className="text-left text-slate-200">
+                <div className="text-left text-white">
                   <p>ID: {result.studentId}</p>
                   <p>Name: {result.fullName}</p>
                   <p>Email: {result.studentEmail}</p>
