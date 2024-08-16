@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { getStudentId, QueueData } from "@/lib/firestore";
+import { getStudentId, QueueData } from "@/lib/queueFirestore";
 import toast, { Toaster } from "react-hot-toast";
 import { Check, X } from "lucide-react";
 

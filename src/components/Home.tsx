@@ -22,10 +22,10 @@ const Home = () => {
           <p>
             Please contact{" "}
             <a
-              href="mailto:victorwongym@gmail.com"
+              href="mailto:opcelestial2024@gmail.com"
               className="hover:text-slate-400"
             >
-              victorwongym@gmail.com
+              opcelestial2024@gmail.com
             </a>{" "}
             if there is any discrepancy.
           </p>

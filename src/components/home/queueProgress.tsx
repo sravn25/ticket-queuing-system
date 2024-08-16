@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Progress } from "../ui/progress";
-import { getQueueCount } from "@/lib/firestore";
+import { getQueueCount } from "@/lib/queueFirestore";
 
 const MAX_TICKETS = 1500;
 

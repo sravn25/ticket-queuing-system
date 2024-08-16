@@ -1,8 +1,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Orbit, MoreHorizontal } from "lucide-react";
-import { fetchQueueData, QueueData } from "@/lib/firestore";
+import { Orbit, MoreHorizontal, Ticket } from "lucide-react";
+import {
+  fetchQueueData,
+  QueueData,
+  updateCollected,
+} from "@/lib/queueFirestore";
 import { QueueTable } from "./dashboard/queueTable";
 import { columns } from "./dashboard/columns";
 import { useEffect, useState } from "react";
@@ -16,14 +20,18 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
-import { updateCollected } from "@/lib/firestore";
 import toast, { Toaster } from "react-hot-toast";
+import RegisterModal from "./dashboard/registerModal";
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const [queueData, setQueueData] = useState<QueueData[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [refresh, setRefresh] = useState<number>(0);
+  const [studentId, setStudentId] = useState<string>("");
+
+  const [isRegisterModalOpen, setIsRegisterModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -41,6 +49,14 @@ const Dashboard = () => {
     }, 500);
     console.log(refresh);
   }, [refresh]);
+
+  const handleRegisterModalOpen = () => {
+    setIsRegisterModalOpen(true);
+  };
+
+  //const handleRegisterModalClose = () => {
+  //  setIsRegisterModalOpen(false);
+  //};
 
   if (loading) {
     return (
@@ -86,6 +102,18 @@ const Dashboard = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        {queue.collected ? null : (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleRegisterModalOpen();
+                              setStudentId(queue.studentId);
+                            }}
+                            className="text-green-500 font-semibold"
+                          >
+                            <Ticket className="w-4 h-4 mr-2" />
+                            Register
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                           onClick={() => {
                             updateCollected(queue.studentId);
@@ -124,6 +152,11 @@ const Dashboard = () => {
         ) : (
           <p>No data available</p>
         )}
+        <RegisterModal
+          isOpen={isRegisterModalOpen}
+          onClose={() => setIsRegisterModalOpen(false)}
+          studentId={studentId}
+        />
       </div>
       <Toaster />
     </>

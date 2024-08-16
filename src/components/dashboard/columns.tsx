@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { QueueData, updateCollected } from "@/lib/firestore";
+import { QueueData, updateCollected } from "@/lib/queueFirestore";
 import { Check, X, MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import {

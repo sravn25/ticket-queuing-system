@@ -12,7 +12,7 @@ import {
 } from "../ui/form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { getQueueCount, storeQueueData } from "@/lib/firestore";
+import { getQueueCount, storeQueueData } from "@/lib/queueFirestore";
 import { useState } from "react";
 import { Loader2, Ticket } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
