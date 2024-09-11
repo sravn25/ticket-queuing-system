@@ -12,12 +12,14 @@ interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   studentId: string;
+  source: "queue" | "wait";
 }
 
 const RegisterModal: React.FC<RegisterModalProps> = ({
   isOpen,
   onClose,
   studentId,
+  source,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -28,7 +30,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
             Only ticket number is required, Student ID is automatically added.
           </DialogDescription>
         </DialogHeader>
-        <RegisterForm studentId={studentId} />
+        <RegisterForm studentId={studentId} onClose={onClose} source={source} />
       </DialogContent>
     </Dialog>
   );

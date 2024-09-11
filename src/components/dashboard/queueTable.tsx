@@ -20,6 +20,9 @@ import {
 } from "../ui/table";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { RefreshCw } from "lucide-react";
+import { useRegistration } from "@/contexts/RegistrationContext";
+import toast from "react-hot-toast";
 
 interface QueueTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +35,7 @@ export function QueueTable<TData, TValue>({
 }: QueueTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const table = useReactTable({
     data,
@@ -48,9 +52,31 @@ export function QueueTable<TData, TValue>({
     },
   });
 
+  const {
+    refreshQueueData,
+    refreshWaitData,
+    refreshRegistrationData,
+    refreshCounterData,
+  } = useRegistration();
+
+  const refreshTable = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      await refreshQueueData();
+      await refreshWaitData();
+      await refreshRegistrationData();
+      await refreshCounterData();
+      toast.success("Refreshed");
+    } catch (error) {
+      console.error("error refreshing", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
-      <div className="flex items-center pt-4  ml-8">
+      <div className="flex items-center pt-4 ml-8 gap-4">
         <Input
           placeholder="Search Student ID"
           value={
@@ -61,6 +87,9 @@ export function QueueTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <Button variant="outline" disabled={loading} onClick={refreshTable}>
+          <RefreshCw className="h-4 w-4" />
+        </Button>
       </div>
       <div className="rounded-md border m-8">
         <Table>

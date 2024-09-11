@@ -12,7 +12,6 @@ import {
 } from "../ui/form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { storeQueueData } from "@/lib/queueFirestore";
 import { useState } from "react";
 import { Loader2, Ticket } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -27,6 +26,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { timeslotLimit } from "@/lib/counterFirestore";
+import { storeWaitData } from "@/lib/waitFirestore";
 
 const englishNameRegex = /^[A-Za-z\s,\\/]+$/;
 const studentIdRegex = /^\d{7}$/;
@@ -59,11 +59,11 @@ const formSchema = z.object({
     }),
     venue: z.enum(["TGH", "LT1"], { message: "Invalid venue" }),
   }),
-  queuingStatus: z.enum(["queuing", "cancelled", "collected"]),
+  queuingStatus: z.enum(["queuing", "waiting", "cancelled", "collected"]),
   ticketNumber: z.string().nullable(),
 });
 
-export const QueueForm = () => {
+export const WaitForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const { counterData, refreshCounterData, timeslotData } = useRegistration();
@@ -78,12 +78,12 @@ export const QueueForm = () => {
       phoneNumber: "",
       vegetarian: false,
       dateTime: getCurrentDateTime(),
-      rank: counterData?.queueCount || 0,
+      rank: counterData?.waitingCount || 0,
       collectDetails: {
-        timeslot: counterData?.queueCount || 0 < 1350 ? "530" : "5",
-        venue: counterData?.queueCount || 0 < 1350 ? "TGH" : "LT1",
+        timeslot: "5",
+        venue: "LT1",
       },
-      queuingStatus: "queuing",
+      queuingStatus: "waiting",
       ticketNumber: null,
     },
   });
@@ -103,8 +103,8 @@ export const QueueForm = () => {
       console.log("Values ranking:", values.rank);
 
       //submit
-      await storeQueueData(values);
-      toast.success("Queued for ticket successfully");
+      await storeWaitData(values);
+      toast.success("Joined waiting list successfully");
 
       await refreshCounterData();
 
@@ -209,9 +209,10 @@ export const QueueForm = () => {
               <FormItem className="space-y-3">
                 <FormLabel>Timeslot</FormLabel>
                 <FormDescription className="font-semibold">
-                  Date: 18th September
+                  Date: 19th September
                   <br />
-                  Venue: The Grand Hall (TGH), Taylor's University
+                  Venue: Will be emailed in a first come first serve basis if
+                  there are empty slots from the queuing list
                 </FormDescription>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
@@ -220,16 +221,12 @@ export const QueueForm = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="530">
-                      5:30PM ({`${450 - (timeslotData?.TGH["530"].count || 0)}`}{" "}
+                    <SelectItem value="5">
+                      5:00PM ({`${250 - (timeslotData?.LT1["5"].count || 0)}`}{" "}
                       slots left)
                     </SelectItem>
-                    <SelectItem value="630">
-                      6:30PM ({`${450 - (timeslotData?.TGH["630"].count || 0)}`}{" "}
-                      slots left)
-                    </SelectItem>
-                    <SelectItem value="730">
-                      7:30PM ({`${450 - (timeslotData?.TGH["730"].count || 0)}`}{" "}
+                    <SelectItem value="6">
+                      6:00PM ({`${250 - (timeslotData?.LT1["6"].count || 0)}`}{" "}
                       slots left)
                     </SelectItem>
                   </SelectContent>
@@ -278,4 +275,4 @@ export const QueueForm = () => {
   );
 };
 
-export default QueueForm;
+export default WaitForm;

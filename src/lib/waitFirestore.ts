@@ -1,7 +1,8 @@
 import {
-  updateQueueCounter,
   updateTimeslot,
   updateVegetarianCounter,
+  updateWaitingCounter,
+  updateWaitingToQueueCounter,
 } from "./counterFirestore";
 import { db } from "./firebaseConfig";
 import {
@@ -13,25 +14,9 @@ import {
   getDocs,
   arrayUnion,
 } from "firebase/firestore";
+import { QueueData } from "./queueFirestore";
 
-export interface QueueData {
-  fullName: string;
-  studentId: string;
-  studentEmail: string;
-  personalEmail: string;
-  phoneNumber: string;
-  vegetarian: boolean;
-  dateTime: string;
-  rank: number;
-  collectDetails: {
-    timeslot: string;
-    venue: "TGH" | "LT1";
-  };
-  queuingStatus: "queuing" | "waiting" | "cancelled" | "collected";
-  ticketNumber: string | null;
-}
-
-export const storeQueueData = async (queueData: QueueData): Promise<void> => {
+export const storeWaitData = async (queueData: QueueData): Promise<void> => {
   const {
     fullName,
     studentId,
@@ -46,16 +31,21 @@ export const storeQueueData = async (queueData: QueueData): Promise<void> => {
     ticketNumber,
   } = queueData;
 
-  const docRef = doc(db, "queue", studentId);
+  const queueRef = doc(db, "queue", studentId);
+  const waitRef = doc(db, "wait", studentId);
 
   try {
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
+    const queueSnap = await getDoc(queueRef);
+    if (queueSnap.exists()) {
       throw new Error("Student ID already exist");
     }
 
-    await setDoc(docRef, {
+    const waitSnap = await getDoc(waitRef);
+    if (waitSnap.exists()) {
+      throw new Error("Student ID already exist");
+    }
+
+    await setDoc(waitRef, {
       fullName,
       studentId,
       studentEmail,
@@ -71,7 +61,7 @@ export const storeQueueData = async (queueData: QueueData): Promise<void> => {
 
     console.log("documented updated successfully");
     if (queueData.vegetarian) await updateVegetarianCounter(1);
-    await updateQueueCounter(1);
+    await updateWaitingCounter(1);
     await updateTimeslot(
       queueData.collectDetails.venue,
       1,
@@ -84,16 +74,16 @@ export const storeQueueData = async (queueData: QueueData): Promise<void> => {
   }
 };
 
-export const fetchQueueData = async (): Promise<QueueData[]> => {
-  const queueCollectionRef = collection(db, "queue");
+export const fetchWaitData = async (): Promise<QueueData[]> => {
+  const waitCollectionRef = collection(db, "wait");
 
   try {
-    const querySnapshot = await getDocs(queueCollectionRef);
-    const queueDataList: QueueData[] = [];
+    const querySnapshot = await getDocs(waitCollectionRef);
+    const waitDataList: QueueData[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data() as QueueData;
-      queueDataList.push({
+      waitDataList.push({
         fullName: data.fullName,
         studentId: data.studentId,
         studentEmail: data.studentEmail,
@@ -107,49 +97,24 @@ export const fetchQueueData = async (): Promise<QueueData[]> => {
         ticketNumber: data.ticketNumber,
       });
     });
-    return queueDataList;
+    return waitDataList;
   } catch (error) {
-    console.error("Error fetching queue data:", error);
+    console.error("Error fetching wait data:", error);
     throw error;
   }
 };
 
-export const getStudentId = async (
-  studentId: string,
-): Promise<QueueData | null> => {
-  const queueRef = doc(db, "queue", studentId);
-  const waitRef = doc(db, "wait", studentId);
-
-  try {
-    const queueSnap = await getDoc(queueRef);
-    if (queueSnap.exists()) {
-      return queueSnap.data() as QueueData;
-    }
-
-    const waitSnap = await getDoc(waitRef);
-    if (waitSnap.exists()) {
-      return waitSnap.data() as QueueData;
-    }
-
-    console.log("No document found with the student ID");
-    return null;
-  } catch (error) {
-    console.error("Error retrieving document:", error);
-    throw error;
-  }
-};
-
-export const cancelQueueTicket = async (
+export const cancelWaitTicket = async (
   studentId: string,
   email: string,
 ): Promise<void> => {
-  const queueRef = doc(db, "queue", studentId);
-  const cancelRef = doc(db, "cancel", "queuing");
+  const waitRef = doc(db, "wait", studentId);
+  const cancelRef = doc(db, "cancel", "waiting");
 
   try {
-    const queueSnap = await getDoc(queueRef);
-    if (queueSnap.exists()) {
-      await updateDoc(queueRef, {
+    const waitSnap = await getDoc(waitRef);
+    if (waitSnap.exists()) {
+      await updateDoc(waitRef, {
         queuingStatus: "cancelled",
       });
       console.log(`Cancelled status for ${studentId} updated`);
@@ -164,5 +129,26 @@ export const cancelQueueTicket = async (
     }
   } catch (error) {
     console.error("Error cancelling ticket", error);
+  }
+};
+
+export const updateWaitingToQueuing = async (
+  studentId: string,
+): Promise<void> => {
+  const waitRef = doc(db, "wait", studentId);
+
+  try {
+    const waitSnap = await getDoc(waitRef);
+    if (waitSnap.exists()) {
+      await updateDoc(waitRef, {
+        queuingStatus: "queuing",
+      });
+      await updateWaitingToQueueCounter(1);
+      console.log(`${studentId} updated from waiting to queuing`);
+    } else {
+      console.log("No doc found");
+    }
+  } catch (error) {
+    console.error("Error updating status", error);
   }
 };

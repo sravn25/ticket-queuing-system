@@ -1,15 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { QueueData, updateCollected } from "@/lib/queueFirestore";
-import { Check, X, MoreHorizontal, ArrowUpDown } from "lucide-react";
+import { QueueData } from "@/lib/queueFirestore";
+import { Check, X, ArrowUpDown, Users, Loader } from "lucide-react";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "../ui/dropdown-menu";
 
 export const columns: ColumnDef<QueueData>[] = [
   {
@@ -35,69 +27,32 @@ export const columns: ColumnDef<QueueData>[] = [
     header: "Name",
   },
   {
-    accessorKey: "studentEmail",
-    header: "Student Email",
-  },
-  //{
-  //  accessorKey: "personalEmail",
-  //  header: "Email",
-  //},
-  //{
-  //  accessorKey: "phoneNumber",
-  //  header: "Phone",
-  //},
-  {
     accessorKey: "dateTime",
     header: "Date",
   },
   {
-    accessorKey: "collected",
-    header: "Collected",
+    accessorKey: "queuingStatus",
+    header: "Status",
     cell: ({ row }) =>
-      row.original.collected ? (
+      row.original.queuingStatus === "collected" ? (
         <Check className="text-green-500" />
-      ) : (
+      ) : row.original.queuingStatus === "cancelled" ? (
         <X className="text-red-500" />
+      ) : row.original.queuingStatus === "queuing" ? (
+        <Users className="text-yellow-500" />
+      ) : (
+        <Loader className="text-yellow-500" />
       ),
   },
-  //{
-  //  id: "actions",
-  //  cell: ({ row }) => {
-  //    const queue = row.original;
-  //    return (
-  //      <DropdownMenu>
-  //        <DropdownMenuTrigger asChild>
-  //          <Button variant="ghost" className="h-8 w-8 p-0">
-  //            <span className="sr-only">Open menu</span>
-  //            <MoreHorizontal className="h-4 w-4" />
-  //          </Button>
-  //        </DropdownMenuTrigger>
-  //        <DropdownMenuContent align="end">
-  //          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //          <DropdownMenuItem
-  //            onClick={() => {
-  //              updateCollected(queue.studentId);
-  //            }}
-  //          >
-  //            Update collect status
-  //          </DropdownMenuItem>
-  //          <DropdownMenuItem
-  //            onClick={() => navigator.clipboard.writeText(queue.personalEmail)}
-  //          >
-  //            Copy Personal Email
-  //          </DropdownMenuItem>
-  //          <DropdownMenuItem
-  //            onClick={() => navigator.clipboard.writeText(queue.phoneNumber)}
-  //          >
-  //            Copy Phone Number
-  //          </DropdownMenuItem>
-  //          <DropdownMenuSeparator />
-  //          <DropdownMenuItem className="font-semibold text-red-500">
-  //            Delete
-  //          </DropdownMenuItem>
-  //        </DropdownMenuContent>
-  //      </DropdownMenu>
-  //    );
-  //  },
-  //},
+  {
+    accessorKey: "ticketNumber",
+    header: "Ticket Number",
+    cell: ({ row }) => {
+      return row.original.ticketNumber ? (
+        <span>{row.original.ticketNumber}</span>
+      ) : (
+        <X className="text-red-500" />
+      );
+    },
+  },
 ];

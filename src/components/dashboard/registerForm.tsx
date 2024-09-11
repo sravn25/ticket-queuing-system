@@ -15,7 +15,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Loader2, Ticket } from "lucide-react";
-import { registerTicket } from "@/lib/registerFirestore";
+import { registerTicket, updateStatus } from "@/lib/registerFirestore";
+import { useRegistration } from "@/contexts/RegistrationContext";
 import toast from "react-hot-toast";
 
 const ticketNumberRegex = /^\d{4}$/;
@@ -31,10 +32,17 @@ const formSchema = z.object({
 
 interface RegisterFormProps {
   studentId: string;
+  onClose: () => void;
+  source: "queue" | "wait";
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ studentId }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({
+  studentId,
+  onClose,
+  source,
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const { refreshQueueData, refreshWaitData } = useRegistration();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +58,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ studentId }) => {
     setLoading(true);
     try {
       await registerTicket(values);
+      await updateStatus(studentId, values.ticketNumber, source);
       toast.success("Registered ticket successfully");
+      source === "queue" ? refreshQueueData() : refreshWaitData();
+      onClose();
       form.reset();
     } catch (error) {
       if (error instanceof Error) {

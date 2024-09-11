@@ -1,5 +1,16 @@
+import {
+  updateRegisterCounter,
+  updateRegisteredCounter,
+} from "./counterFirestore";
 import { db } from "./firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 export interface RegisterData {
   ticketNumber: string;
@@ -22,9 +33,76 @@ export const registerTicket = async (
     }
 
     await setDoc(docRef, { ticketNumber, studentId, createdAt, registered });
+    await updateRegisterCounter(1);
     console.log("Document successfully written with ID: ", docRef.id);
   } catch (error) {
     console.log("Error registering ticket:", error);
     throw error;
+  }
+};
+
+// update queuing status
+export const updateStatus = async (
+  studentId: string,
+  ticketNumber: string,
+  type: "queue" | "wait",
+): Promise<void> => {
+  const docRef = doc(db, type, studentId);
+
+  try {
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await updateDoc(docRef, {
+        queuingStatus: "collected",
+        ticketNumber: ticketNumber,
+      });
+      console.log(`Collected status for ${studentId} updated`);
+    } else {
+      console.log("no doc found");
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
+  }
+};
+
+export const fetchRegisterData = async (): Promise<RegisterData[]> => {
+  const registrationCollectionRef = collection(db, "registration");
+
+  try {
+    const querySnapshot = await getDocs(registrationCollectionRef);
+    const registerDataList: RegisterData[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as RegisterData;
+      registerDataList.push({
+        ticketNumber: data.ticketNumber,
+        studentId: data.studentId,
+        createdAt: data.createdAt,
+        registered: data.registered,
+      });
+    });
+    return registerDataList;
+  } catch (error) {
+    console.error("Error fetching registration data:", error);
+    throw error;
+  }
+};
+
+export const updateRegistered = async (ticketNumber: string): Promise<void> => {
+  const docRef = doc(db, "registration", ticketNumber);
+
+  try {
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await updateDoc(docRef, {
+        registered: !docSnap.data().registered,
+      });
+      await updateRegisteredCounter(1);
+      console.log(`Register status for ${ticketNumber} updated`);
+    } else {
+      console.log("no doc found");
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
   }
 };

@@ -1,45 +1,37 @@
-import { useEffect, useState } from "react";
 import { Progress } from "../ui/progress";
-import { getQueueCount } from "@/lib/queueFirestore";
+import { useRegistration } from "@/contexts/RegistrationContext";
 
-const MAX_TICKETS = 1500;
+const MAX_TICKETS = 1350;
+const MAX_WAIT = 500;
 
 const QueueProgress = () => {
-  const [progress, setProgress] = useState<number>(0);
+  const { counterData } = useRegistration();
 
-  const getCount = async (): Promise<void> => {
-    try {
-      const data = await getQueueCount();
-      setProgress(data);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
+  const queueCount = counterData?.queueCount || 0;
+  const waitingCount = counterData?.waitingCount || 0;
 
-  useEffect(() => {
-    getCount();
-
-    const interval = setInterval(() => {
-      getCount();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  //const progressPercentage = (progress / MAX_TICKETS) * 100;
-  const progressPercentage = 80;
+  const queuePercentage = (queueCount / MAX_TICKETS) * 100;
+  const waitPercentage = (waitingCount / MAX_WAIT) * 100;
+  //const progressPercentage = 80;
 
   return (
     <div className="flex flex-col justify-center items-center space-y-2">
       <h3 className="text-xl">
         Event Limit:{" "}
         <span className="font-semibold text-sky-500">
-          {progress} / {MAX_TICKETS}
+          {queueCount} / {MAX_TICKETS}
         </span>{" "}
-        Tickets
+        Queuing
       </h3>
-      <Progress value={progressPercentage} className="w-full" />
+      <Progress value={queuePercentage} className="w-full" />
+      <h3 className="text-xl">
+        Waiting List:{" "}
+        <span className="font-semibold text-sky-500">
+          {waitingCount} / {MAX_WAIT}
+        </span>{" "}
+        Waiting
+      </h3>
+      <Progress value={waitPercentage} className="w-full" />
     </div>
   );
 };

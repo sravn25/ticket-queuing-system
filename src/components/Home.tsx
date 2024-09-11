@@ -1,9 +1,9 @@
-import { Mail } from "lucide-react";
 import QueueModal from "./home/queueModal";
 import QueueProgress from "./home/queueProgress";
 import QueueSearch from "./home/queueSearch";
 import HomeHeader from "./home/header";
 import bgProp from "../assets/2_Logo without word.png";
+import Footer from "./home/footer";
 
 const Home = () => {
   return (
@@ -19,36 +19,22 @@ const Home = () => {
 
         <HomeHeader />
         <div className="p-6 space-y-6 flex flex-col items-center relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8 w-full lg:w-1/2">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8 w-full lg:w-3/5">
             <h1 className="text-4xl sm:text-5xl md:text-7xl text-center md:text-left font-bold font-zendots tracking-wider leading-none">
               You Are in the Queue
             </h1>
-            <div className="flex-1 flex items-center">
-              <QueueSearch />
-            </div>
+            <QueueSearch />
           </div>
-          <p className="font-alata tracking-wide sm:w-1/2">
+          <p className="font-alata tracking-wide sm:w-1/2 text-center">
             Welcome to Orientation Party ticket queuing system, please register
-            by filling the required fields.
+            below.
           </p>
-          <div className="w-full lg:w-1/2">
+          <div className="w-full lg:w-3/5">
             <QueueProgress />
           </div>
           <QueueModal />
         </div>
-        <footer className="flex justify-center items-center p-8 gap-2 bg-slate-600 relative z-10">
-          <Mail className="mr-2 w-8 sm:w-4" />
-          <p>
-            Please contact{" "}
-            <a
-              href="mailto:opcelestial2024@gmail.com"
-              className="hover:text-slate-400 text-slate-300"
-            >
-              opcelestial2024@gmail.com
-            </a>{" "}
-            if there is any discrepancy.
-          </p>
-        </footer>
+        <Footer />
       </div>
     </>
   );

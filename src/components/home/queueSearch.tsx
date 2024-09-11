@@ -32,6 +32,43 @@ const QueueSearch = () => {
     }
   };
 
+  const statusCheck = (status: string): React.ReactNode => {
+    if (status === "queuing" || status === "waiting") {
+      return (
+        <div className="flex items-center">
+          <Check className="bg-yellow-500 w-4 h-4 mr-1" />
+          Queuing
+        </div>
+      );
+    } else if (status === "collected") {
+      return (
+        <div className="flex items-center">
+          <Check className="bg-green-500 h-4 w-4 mr-1" />
+          Collected
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center">
+          <X className="bg-red-500 h-4 w-4 mr-1" />
+          Cancelled
+        </div>
+      );
+    }
+  };
+
+  const collectionDetails = (venue: string, timeslot: string) => {
+    const location = venue === "TGH" ? "The Grand Hall (TGH)" : "To be emailed";
+    const date = venue === "TGH" ? "18th September" : "19th September";
+    return (
+      <>
+        <p>Collection date: {date}</p>
+        <p>Collection time: {timeslot} PM</p>
+        <p>Collection venue: {location}</p>
+      </>
+    );
+  };
+
   return (
     <>
       <div className="text-black flex flex-col gap-4 justify-center font-alata">
@@ -63,20 +100,18 @@ const QueueSearch = () => {
                   Queue Search Result
                 </h3>
                 <div className="text-left text-white">
-                  <p>ID: {result.studentId}</p>
-                  <p>Name: {result.fullName}</p>
-                  <p>Email: {result.studentEmail}</p>
-                  <p className="flex items-center gap-2">
-                    Queued: <Check className="text-green-500" />
-                  </p>
-                  <p className="flex items-center gap-2">
-                    Collected:
-                    {result.collected ? (
-                      <Check className="text-green-500" />
-                    ) : (
-                      <X className="text-red-500" />
-                    )}
-                  </p>
+                  <div>ID: {result.studentId}</div>
+                  <div>Name: {result.fullName}</div>
+                  <div>Email: {result.studentEmail}</div>
+                  <div className="flex items-center gap-2">
+                    Status: {statusCheck(result.queuingStatus)}
+                  </div>
+                  {result.queuingStatus === "cancelled"
+                    ? null
+                    : collectionDetails(
+                        result.collectDetails.venue,
+                        result.collectDetails.timeslot,
+                      )}
                 </div>
               </div>
             ) : (
